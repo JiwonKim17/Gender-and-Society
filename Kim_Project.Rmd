@@ -1,0 +1,330 @@
+---
+title: "Project"
+author: "Jiwon Kim"
+date: "1/19/2021"
+output: html_document
+---
+# Upload Dataset and Load Packages
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r Load Packages}
+library("tidyverse")
+library("Rmisc")
+library("prediction")
+library("stargazer")
+library("knitr")
+library("sjPlot")
+```
+```{r Load WVS Dataset}
+wvs6 <- readRDS("wvs6.rds")
+```
+
+
+# Create and Modify Variables
+
+```{r Look at home language - V247 var}
+summary(wvs6$V247)
+#find class of country
+class(wvs6$V247)
+count(wvs6$V247)
+```
+
+```{r gender_lang cleaned V247}
+
+wvs6 <- mutate(wvs6, gender_lang = ifelse(V247 == 128 |V247 == 101 |V247 == 208 | V247 == 1165 | V247 == 157 | V247 == 289 | V247 == 25 | V247 == 285 | V247 == 132 | V247 == 73 | V247 == 40, 0, V247))
+
+wvs6 <- mutate(wvs6, gender_lang = ifelse(V247 == 19 |V247 == 426 |V247 == 380 | V247 == 158 | V247 == 120 | V247 == 364 | V247 == 377 | V247 == 435 | V247 == 416 | V247 == 363 | V247 == 179, 1, gender_lang))
+
+wvs6 <- mutate(wvs6, gender_lang = ifelse(V247 <0 , NA, gender_lang))
+wvs6 <- mutate(wvs6, gender_lang = ifelse(gender_lang >1 , NA, gender_lang))
+```
+
+
+
+```{r look at gender_lang}
+summary(wvs6$gender_lang)
+count(wvs6$gender_lang)
+```
+
+```{r V45_scarce_job}
+wvs6 <- mutate(wvs6, V45_scarce_job = ifelse(V45 == 1, 0, V45))
+wvs6 <- mutate(wvs6, V45_scarce_job = ifelse(V45 == 2, 5, V45_scarce_job))
+wvs6 <- mutate(wvs6, V45_scarce_job = ifelse(V45 == 3, 10, V45_scarce_job))
+wvs6 <- mutate(wvs6, V45_scarce_job = ifelse(V45 <0, NA, V45_scarce_job))
+
+t.test(V45_scarce_job ~ gender_lang, data = wvs6)
+```
+
+```{r V47_money}
+wvs6 <- mutate(wvs6, V47_money = ifelse(V47 == 1, 0, V47))
+wvs6 <- mutate(wvs6, V47_money = ifelse(V45 == 2, 5, V47_money))
+wvs6 <- mutate(wvs6, V47_money = ifelse(V45 == 3, 10, V47_money))
+wvs6 <- mutate(wvs6, V47_money = ifelse(V45 <0, NA, V47_money))
+
+t.test(V47_money ~ gender_lang, data = wvs6)
+```
+
+```{r V48_independent}
+wvs6 <- mutate(wvs6, V48_independent = ifelse(V48 == 1, 10, V48))
+wvs6 <- mutate(wvs6, V48_independent = ifelse(V48 == 2, 5, V48_independent))
+wvs6 <- mutate(wvs6, V48_independent = ifelse(V48 == 3, 0, V48_independent))
+wvs6 <- mutate(wvs6, V48_independent = ifelse(V48 <0, NA, V48_independent))
+
+t.test(V48_independent ~ gender_lang, data = wvs6)
+```
+
+```{r V50_workingmom}
+wvs6 <- mutate(wvs6, V50_workingmom = ifelse(V50 == 1, 0, V50))
+wvs6 <- mutate(wvs6, V50_workingmom = ifelse(V50 == 2, 3.33, V50_workingmom))
+wvs6 <- mutate(wvs6, V50_workingmom = ifelse(V50 == 3, 6.67, V50_workingmom))
+wvs6 <- mutate(wvs6, V50_workingmom = ifelse(V50 == 4, 10, V50_workingmom))
+wvs6 <- mutate(wvs6, V50_workingmom = ifelse(V50 <0, NA, V50_workingmom))
+
+t.test(V50_workingmom ~ gender_lang, data = wvs6)
+```
+
+```{r V51_poli_leader}
+wvs6 <- mutate(wvs6, V51_poli_leader = ifelse(V51 == 1, 0, V51))
+wvs6 <- mutate(wvs6, V51_poli_leader = ifelse(V51 == 2, 3.33, V51_poli_leader))
+wvs6 <- mutate(wvs6, V51_poli_leader = ifelse(V51 == 3, 6.67, V51_poli_leader))
+wvs6 <- mutate(wvs6, V51_poli_leader = ifelse(V51 == 4, 10, V51_poli_leader))
+wvs6 <- mutate(wvs6, V51_poli_leader = ifelse(V51 <0, NA, V51_poli_leader))
+
+t.test(V51_poli_leader ~ gender_lang, data = wvs6)
+```
+
+```{r V52_uniedu}
+wvs6 <- mutate(wvs6, V52_uniedu = ifelse(V52 == 1, 0, V52))
+wvs6 <- mutate(wvs6, V52_uniedu = ifelse(V52 == 2, 3.33, V52_uniedu))
+wvs6 <- mutate(wvs6, V52_uniedu = ifelse(V52 == 3, 6.67, V52_uniedu))
+wvs6 <- mutate(wvs6, V52_uniedu = ifelse(V52 == 4, 10, V52_uniedu))
+wvs6 <- mutate(wvs6, V52_uniedu = ifelse(V52 <0, NA, V52_uniedu))
+
+t.test(V52_uniedu ~ gender_lang, data = wvs6)
+```
+
+```{r V53_bus}
+wvs6 <- mutate(wvs6, V53_bus = ifelse(V53 == 1, 0, V53))
+wvs6 <- mutate(wvs6, V53_bus = ifelse(V53 == 2, 3.33, V53_bus))
+wvs6 <- mutate(wvs6, V53_bus = ifelse(V53 == 3, 6.67, V53_bus))
+wvs6 <- mutate(wvs6, V53_bus = ifelse(V53 == 4, 10, V53_bus))
+wvs6 <- mutate(wvs6, V53_bus = ifelse(V53 <0, NA, V53_bus))
+
+t.test(V53_bus ~ gender_lang, data = wvs6)
+```
+
+```{r V54_housewife}
+wvs6 <- mutate(wvs6, V54_housewife = ifelse(V54 == 1, 10, V54))
+wvs6 <- mutate(wvs6, V54_housewife = ifelse(V54 == 2, 6.67, V54_housewife))
+wvs6 <- mutate(wvs6, V54_housewife = ifelse(V54 == 3, 3.33, V54_housewife))
+wvs6 <- mutate(wvs6, V54_housewife = ifelse(V54 == 4, 0, V54_housewife))
+
+wvs6 <- mutate(wvs6, V54_housewife = ifelse(V54 <0, NA, V54_housewife))
+
+t.test(V54_housewife ~ gender_lang, data = wvs6)
+```
+
+
+
+```{r combined}
+wvs6 <- mutate(wvs6, gender_ideology = (V45_scarce_job+V47_money+V48_independent+V50_workingmom+V51_poli_leader+V52_uniedu+V53_bus+V54_housewife)/8)
+
+t.test(gender_ideology ~ gender_lang, data = wvs6)
+```
+
+
+```{r create dummy female variable, echo = TRUE}
+wvs6 <- mutate(wvs6, female = ifelse(V240 == 1, 0, V240))
+wvs6 <- mutate(wvs6, female = ifelse(V240 == 2, 1, female))
+wvs6 <- mutate(wvs6, female = ifelse(V240 < 0, NA, female))
+wvs6$female <- as.factor(wvs6$female)
+
+wvs6 <- mutate(wvs6, male = ifelse(V240 == 1, 1, V240))
+wvs6 <- mutate(wvs6, male = ifelse(V240 == 2, 0, male))
+wvs6 <- mutate(wvs6, male = ifelse(V240 < 0, NA, male))
+wvs6$male <- as.factor(wvs6$male)
+```
+
+```{r}
+wvs6 <- mutate(wvs6, immigrant = ifelse(V245 == 2, 1, V245))
+wvs6 <- mutate(wvs6, immigrant = ifelse(V245 == 1, 0, immigrant))
+wvs6 <- mutate(wvs6, immigrant = ifelse(V245 < 0, NA, immigrant))
+wvs6$immigrant <- as.factor(wvs6$immigrant)
+
+count(wvs6$immigrant)
+
+
+wvs6 <- mutate(wvs6, citizen = ifelse(V246 == 1, 1, V246))
+wvs6 <- mutate(wvs6, citizen = ifelse(V246 == 2, 0, citizen))
+wvs6 <- mutate(wvs6, citizen = ifelse(V246 < 0, NA, citizen))
+wvs6$citizen <- as.factor(wvs6$citizen)
+
+wvs6$region <- as.factor(wvs6$region)
+wvs6$country <- as.factor(wvs6$country)
+```
+# recode V248 and assign variable name 'education'
+wvs6 <-  wvs6 %>% 
+  mutate(education = ifelse(V248 == -5| V248 == -1, NA,
+                ifelse(V248 == 1, "None",
+                ifelse(V248 %in% c(2, 3), "Primary",
+                ifelse(V248 %in% c(4, 6), "Inc_Secondary",
+                ifelse(V248 %in% c(5, 7), "Secondary",
+                ifelse(V248 == 8, "Inc_Univ",
+                ifelse(V248 == 9, "University", NA))))))))
+
+wvs6$education <- factor(wvs6$education, levels = 
+                           c("None", "Primary", "Inc_Secondary",
+                           "Secondary", "Inc_Univ", "University"))
+
+```{r Generate Education Variable }
+# recode V248 and assign variable name 'education'
+
+wvs6 <- mutate(wvs6, education_cat = ifelse(V248 == 1 , "None", V248))
+wvs6 <- mutate(wvs6, education_cat = ifelse(V248 == 2 | V248 == 3, "Primary", education_cat))
+wvs6 <- mutate(wvs6, education_cat = ifelse(V248 == 4| V248 == 5 | V248 == 6| V248 == 7, "Secondary", education_cat))
+wvs6 <- mutate(wvs6, education_cat = ifelse(V248 == 8| V248 == 9 , "University", education_cat))
+wvs6 <- mutate(wvs6, education_cat = ifelse(V248 <0, NA, education_cat))
+
+
+wvs6$education_cat <- factor(wvs6$education_cat, levels = 
+                           c("None","Primary","Secondary", "University"))
+
+count(wvs6$education_cat) 
+count(wvs6$V248) 
+
+```
+
+
+```{r Regression combined gender_ideologydddsdd}
+summary(lm(gender_ideology ~ gender_lang , data = wvs6))
+summary(lm(gender_ideology ~ gender_lang + female, data = wvs6))
+```
+
+
+```{r Regression combined gender_ideology}
+wvs6$gender_lang <- as.factor(wvs6$gender_lang)
+
+summary(lm(gender_ideology ~ gender_lang * female * education_cat, data = wvs6))
+summary(lm(gender_ideology ~ female * education_cat , data = wvs6))
+summary(lm(gender_ideology ~ gender_lang * education_cat , data = wvs6))
+
+
+```
+
+```{r Regression combined gender_ideologyd}
+p <- plot_model(lm(gender_ideology ~ gender_lang * female , data = wvs6), type = "int", title = 'Predicted values of Gender Ideology by Genderness of Langauge')
+p + labs(x= "Genderness of Language",y="Gender Ideology")
+```
+
+
+
+# lab 
+
+```{r}
+summary(lm(gender_ideology ~ gender_lang, data = wvs6))
+```
+
+```{r}
+summary(lm(gender_ideology ~ gender_lang + female, data = wvs6))
+```
+
+```{r, results = 'asis'}
+stargazer(lm(gender_ideology ~ gender_lang , data = wvs6),lm(gender_ideology ~ gender_lang + female, data = wvs6), 
+          type = "html", 
+          title = "Table 2: Nested OLS Regression Models Predicting Gender Ideology from Genderness of Language Spoken at Home and Controls of Female",
+          dep.var.labels = "Gender Ideology",
+          covariate.labels = c("Gendered Language", "Female"))
+```
+
+```{r}
+summary(lm(gender_ideology ~ gender_lang + education_cat, data = wvs6))
+```
+
+```{r, results = 'asis'}
+stargazer(lm(gender_ideology ~ gender_lang , data = wvs6),lm(gender_ideology ~ gender_lang + education_cat, data = wvs6), 
+          type = "html", 
+          title = "Table 3: Nested OLS Regression Models Predicting Gender Ideology from Genderness of Language Spoken at Home and Controls of Education",
+          dep.var.labels = "Gender Ideology",
+          covariate.labels = c("Gendered Language", "Primary", "Secondary","University"))
+```
+
+
+summary(lm(gender_ideology ~ gender_lang * female, data = wvs6))
+
+{r, results = 'asis'}
+stargazer(lm(gender_ideology ~ gender_lang, data = wvs6),lm(gender_ideology ~ gender_lang*female, data = wvs6), 
+          type = "html", 
+          title = "Table 5: Nested OLS Regression Models Predicting Gender Ideology from Genderness of Language Spoken at Home & Female",
+          dep.var.labels = "Gender Ideology",
+          covariate.labels = c("Gendered Language", "Female", "Gendered Language:Female"),report = ('vc*'))
+
+
+
+p <- plot_model(lm(gender_ideology ~ gender_lang * female , data = wvs6), type = "int", title = 'Figure 1: Predicted Gender Ideology by Genderness of Langauge')
+p + labs(x= "Genderness of Language",y="Gender Ideology")+  scale_color_manual(values = c("darkturquoise", "coral2"), name = "Gender",labels = c("Male", "Female"))
+
+
+
+summary(lm(gender_ideology ~ gender_lang * female+ education_cat, data = wvs6))
+
+```{r, results = 'asis'}
+stargazer(lm(gender_ideology ~ gender_lang*female, data = wvs6),lm(gender_ideology ~ gender_lang*female + education_cat, data = wvs6), 
+          type = "html", 
+          title = "Table 5: Nested OLS Regression Models Predicting Gender Ideology from Genderness of Language Spoken at Home & Female and Control of Education",
+          dep.var.labels = "Gender Ideology",
+          covariate.labels = c("Gendered Language", "Female", "Primary", "Secondary", "University","Gendered Language:Female"))
+```
+
+
+```{r, results = 'asis'}
+
+stargazer(lm(gender_ideology ~ gender_lang*female, data = wvs6),lm(gender_ideology ~ gender_lang*female + education_cat, data = wvs6),lm(gender_ideology ~ gender_lang*male + education_cat, data = wvs6), 
+          type = "html", 
+          title = "Table 5: Nested OLS Regression Models Predicting Gender Ideology from Genderness of Language Spoken at Home & Gender and Control of Education",
+          dep.var.labels = "Gender Ideology",
+          covariate.labels = c("Gendered Language", "Female","Male", "Primary", "Secondary", "University","Gendered Language:Female","Gendered Language:Male"))
+```
+
+
+
+predicted1 <- prediction_summary(lm(gender_ideology ~ gender_lang*female, data = wvs6), at = list(gender_lang = c('0', '1')))
+predicted1 <- mutate(predicted1, 
+          gender_lang = c('Genderless Language', 'Gendered Language'))
+          
+predicted1 <- mutate(predicted1, control = 0)
+
+predicted2 <- prediction_summary(lm(gender_ideology ~ gender_lang*female+education_cat, data = wvs6), at = list(gender_lang = c('0', '1')))
+predicted2 <- mutate(predicted2, 
+          gender_lang = c('Genderless Language', 'Gendered Language'))
+predicted2 <- mutate(predicted2, control = 1)
+
+predict_combo <- rbind(predicted1, predicted2)
+predict_combo$control <- as.factor(predict_combo$control)
+
+ggplot(predict_combo, 
+aes(x=gender_lang, y=Prediction, fill = control)) + 
+geom_bar(stat = "identity", position = "dodge") + 
+  geom_errorbar(aes(ymin=lower, ymax=upper),   position=position_dodge()) +
+ggtitle("Figure 3: Predicted Gender Ideology by Genderness of Langauge with Control of Education")+
+labs(y="Gender Ideology",
+     x = "Genderness of Language")+
+theme(axis.text.x = element_text(angle = 0, hjust = 1)) +scale_fill_discrete(name = "Control", labels = c("No Control", "Education"))+ theme(plot.title = element_text(size=12))
+
+
+
+
+```{r, results = 'asis'}
+p <- plot_model(lm(gender_ideology ~ gender_lang * female + education_cat, data = wvs6), type = "int", title = 'Figure 1: Predicted Gender Ideology by Genderness of Langauge with Control of Education ')
+p + labs(x= "Genderness of Language",y="Gender Ideology")+  scale_color_manual(values = c("darkturquoise", "coral2"), name = "Gender",labels = c("Male", "Female"))+ theme(plot.title = element_text(size=11))
+
+```
+
+# Subset Data
+
+# Run Regressions
+
+# Predicted Values
+
+# Figures
+
